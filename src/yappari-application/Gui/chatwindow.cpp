@@ -32,6 +32,7 @@
 #include <QListWidgetItem>
 #include <QTextBrowser>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
 #include <QDateTime>
@@ -49,6 +50,9 @@
 #include "conversationdelegate.h"
 #include "mutedialog.h"
 #include "mediaselectdialog.h"
+#include "imagepreviewdialog.h"
+#include "videopreviewdialog.h"
+#include "audiopreviewdialog.h"
 #include "contactinfowindow.h"
 #include "globalconstants.h"
 
@@ -66,6 +70,10 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+
+// Solve clash between Xlib FocusIn and QEvent::FocusIn
+enum { XFocusIn = FocusIn };
+#undef FocusIn
 
 #define TEXTEDIT_HEIGHT     70
 #define MAX_FILE_SIZE       16777216
@@ -159,6 +167,9 @@ ChatWindow::ChatWindow(Contact *contact, QWidget *parent) :
     connect(ui->scrollArea,SIGNAL(topReached()),
             this,SLOT(readMoreLogLines()));
 
+    connect(ui->scrollArea,SIGNAL(bottomReached()),
+            this,SLOT(setMessagesAsRead()));
+
     setBlock(contact->blocked);
 
     readMoreLogLines();
@@ -192,6 +203,21 @@ void ChatWindow::readMoreLogLines()
     QList<FMessage> list = logger.lastMessages();
 
     ui->scrollArea->loadLogMessages(list);
+}
+
+void ChatWindow::setMessagesAsRead()
+{
+    if(!isActiveWindow()) return;
+
+    FMessage msg = logger.lastMessage();
+    if(msg.key.from_me || msg.status == FMessage::ReceivedByTarget) return;
+
+    if(msg.key.remote_jid.right(5) != "@g.us" && !Client::blueChecks) return;
+
+    emit messageRead(msg);
+    msg.status = FMessage::ReceivedByTarget;
+    logger.updateLoggedMessage(msg);
+    Utilities::logData("Message should now be marked as read");
 }
 
 void ChatWindow::messageReceived(FMessage& message)
@@ -295,8 +321,8 @@ void ChatWindow::textChanged()
 
 void ChatWindow::myselfComposing(int waType)
 {
-    if (contact->type == Contact::TypeContact)
-    {
+    //if (contact->type == Contact::TypeContact) Let's keep it for future broadcast implementation
+    //{
         isMyselfComposing = true;
 
         FMessage message(contact->jid,true);
@@ -304,32 +330,34 @@ void ChatWindow::myselfComposing(int waType)
         message.media_wa_type = waType;
 
         emit sendMessage(message);
-    }
+    //}
 }
 
 void ChatWindow::myselfPaused()
 {
-    if (contact->type == Contact::TypeContact)
-    {
+    //if (contact->type == Contact::TypeContact) Let's keep it for future broadcast implementation
+    //{
         isMyselfComposing = false;
 
         FMessage message(contact->jid,true);
         message.type = FMessage::PausedMessage;
 
         emit sendMessage(message);
-    }
+    //}
 }
 
 
-void ChatWindow::composing(QString media)
+void ChatWindow::composing(QString participant, QString media)
 {
     isPeerComposing = true;
     QString text = (media == "audio") ? " is recording audio..." : " is typing...";
-    ui->typingStatusLabel->setText(Utilities::removeEmoji(contact->name) + text);
+    QString n = participant=="" ? contact->name : participant;
+    ui->typingStatusLabel->setText(Utilities::removeEmoji(n) + text);
 }
 
-void ChatWindow::paused()
+void ChatWindow::paused(QString participant)
 {
+    //Participan not used yet, but can be used in group when more than one is typing
     if (isPeerComposing)
         // ui->typingStatusLabel->setText(Utilities::removeEmoji(contact->name) + " stopped typing.");
         ui->typingStatusLabel->clear();
@@ -337,6 +365,12 @@ void ChatWindow::paused()
 
 bool ChatWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    if(event->type() == QEvent::WindowActivate)
+    {
+        setMessagesAsRead();
+        return true;
+    }
+
     if (obj == ui->centralwidget)
     {
         if (event->type() == QEvent::MouseButtonPress)
@@ -404,26 +438,42 @@ void ChatWindow::selectMultimediaMessage()
             }
             else
             {
-                // Confirmation dialog
-                QMessageBox msg(this);
-                int index = fileName.lastIndexOf('/');
-                index++;
-                msg.setText("Are you sure you want to send the file " +
-                            fileName.mid(index) + "?");
-                msg.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
+                Utilities::logData("File selected: " + fileName);
 
-                if (msg.exec() == QMessageBox::Yes)
+                QString short_caption;
+                if(waType==FMessage::Video)
                 {
-                    Utilities::logData("File selected: " + fileName);
-
-                    sendMultimediaMessage(fileName, waType, false);
+                    VideoPreviewDialog preview(this, fileName);
+                    if (preview.exec() != QDialog::Accepted) {
+                        return;
+                    }
+                    short_caption = preview.getCaption().left(160);
                 }
+                else if(waType==FMessage::Audio)
+                {
+                    AudioPreviewDialog preview(this, fileName);
+                    if (preview.exec() != QDialog::Accepted) {
+                        return;
+                    }
+                    short_caption = preview.getCaption().left(160);
+                }
+                else if(waType==FMessage::Image)
+                {
+                    ImagePreviewDialog preview(this, fileName);
+                    if (preview.exec() != QDialog::Accepted) {
+                        return;
+                    }
+                    short_caption = preview.getCaption().left(160);
+                }
+
+                Utilities::logData("Caption shortened to " + short_caption);
+                sendMultimediaMessage(fileName, waType, false, short_caption);
             }
         }
     }
 }
 
-void ChatWindow::sendMultimediaMessage(QString fileName, int waType, bool live)
+void ChatWindow::sendMultimediaMessage(QString fileName, int waType, bool live, QString caption)
 {
     QFile file(fileName);
 
@@ -436,6 +486,7 @@ void ChatWindow::sendMultimediaMessage(QString fileName, int waType, bool live)
     msg.media_wa_type = waType;
     msg.local_file_uri = fileName;
     msg.live = live;
+    msg.media_caption = caption;
 
     // We still don't know the duration in seconds
     msg.media_duration_seconds = 0;
@@ -857,7 +908,7 @@ void ChatWindow::finishedRecording(QString fileName, int lengthInSeconds)
 
 #ifndef Q_WS_SCRATCHBOX
         // Send media
-        sendMultimediaMessage(fileName, FMessage::Audio, true);
+        sendMultimediaMessage(fileName, FMessage::Audio, true, "");
 #endif
     }
 }

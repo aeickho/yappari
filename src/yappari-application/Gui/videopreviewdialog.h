@@ -1,4 +1,4 @@
-/* Copyright 2013 Naikel Aparicio. All rights reserved.
+/* Copyright 2015 Alvaro Gamez Machado <alvaro.gamez@hazent.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,23 +26,31 @@
  * official policies, either expressed or implied, of the copyright holder.
  */
 
-#ifndef WAEXISTSREQUEST_H
-#define WAEXISTSREQUEST_H
+#ifndef VIDEOPREVIEWDIALOG_H
+#define VIDEOPREVIEWDIALOG_H
 
-#include <QString>
-#include <QSystemInfo>
+#include <QDialog>
 
-#include "warequest.h"
+namespace Ui {
+    class VideoPreviewDialog;
+}
 
-// QtMobility namespace
-QTM_USE_NAMESPACE
-
-class WAExistsRequest : public WARequest
+class VideoPreviewDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    WAExistsRequest(QString cc, QString in, QString id, QObject *parent = 0);
+    explicit VideoPreviewDialog(QWidget *parent, const QString & media_path);
+    ~VideoPreviewDialog();
+    QString getCaption();
+
+public slots:
+    void playstop();
+    void finished();
+
+private:
+    Ui::VideoPreviewDialog *ui;
+
 };
 
-#endif // WAEXISTSREQUEST_H
+#endif // VIDEOPREVIEWDIALOG_H

@@ -46,6 +46,7 @@ public:
         SentByClient,
         ReceivedByServer,
         ReceivedByTarget,
+        ReadByTarget,
         NeverSent,
         ServerBounce,
         Played
@@ -97,6 +98,9 @@ public:
     QString notify_name;
     QString remote_resource;
     ContentType type;
+    int count;
+    QString delivered;
+    QString read;
 
     double latitude;
     double longitude;
@@ -108,6 +112,7 @@ public:
     QString media_name;
     qint64 media_size;
     QString media_url;
+    QString media_caption;
     int media_wa_type;
 
     QString local_file_uri;

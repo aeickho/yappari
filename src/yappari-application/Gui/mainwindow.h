@@ -91,8 +91,8 @@ public slots:
     void lockModeChanged(QString lockMode);
     void available(QString jid, bool online);
     void available(QString jid, qint64 lastSeen);
-    void composing(QString jid, QString media);
-    void paused(QString jid);
+    void composing(QString jid, QString participant, QString media);
+    void paused(QString jid, QString participant);
     void showDonate();
     void groupLeft(QString jid);
     void requestSync();
@@ -106,6 +106,7 @@ public slots:
     void requestPhotoUpdate(QString jid, QString photoId, bool largeFormat);
     void requestContactStatus(QString jid);
     void sendVoiceNotePlayed(FMessage message);
+    void sendMessageRead(FMessage message);
     void showStatusWindow();
     void photoReceived(Contact& c, QImage photo, QString photoId);
     void viewContact(Contact *c);
@@ -154,6 +155,7 @@ signals:
     void activeChatChanged(QString jid);
     void sendSetGroupSubject(QString gjid, QString newSubject);
     void requestLeaveGroup(QString jid);
+    void getMyStatus();
     void changeStatus(QString newStatus);
     void changeUserName(QString newUserName);
     void sync();
@@ -171,6 +173,7 @@ signals:
     void previewPhotoReceived(QString jid);
     void largePhotoReceived(QString jid, QImage photo, QString photoId);
     void onlineStatusChanged(QString jid);
+    void ownStatusUpdated(QString);
     void userStatusUpdated(QString jid);
     void groupSubjectUpdated(QString gjid);
     void addGroupParticipant(QString gjid, QString participant);
@@ -180,6 +183,7 @@ signals:
     void requestBlockOrUnblockContact(QString jid, bool blocked);
     void privacyListRefreshed();
     void voiceNotePlayed(FMessage message);
+    void messageRead(FMessage message);
     void updateLastDir(int waType, QString dir);
 
 };

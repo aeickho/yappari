@@ -307,6 +307,9 @@ ChatWindow *MainWindow::createChatWindow(Contact& contact, bool show)
         connect(chat,SIGNAL(voiceNotePlayed(FMessage)),
                 this,SLOT(sendVoiceNotePlayed(FMessage)));
 
+        connect(chat,SIGNAL(messageRead(FMessage)),
+                this,SLOT(sendMessageRead(FMessage)));
+
         connect(chat,SIGNAL(updateLastDir(int,QString)),
                 this,SLOT(requestUpdateLastDir(int,QString)));
 
@@ -676,22 +679,27 @@ void MainWindow::available(QString jid, qint64 lastSeen)
 }
 
 
-void MainWindow::composing(QString jid, QString media)
+void MainWindow::composing(QString jid, QString participant, QString media)
 {
     if (chatWindowList.contains(jid))
     {
         ChatWindow *chat = chatWindowList.value(jid);
-        chat->composing(media);
+        if (participant.isEmpty()) {
+            chat->composing("", media);
+        } else {
+            Contact& c = roster->getContact(participant);
+            chat->composing(c.name, media);
+        }
     }
 }
 
 
-void MainWindow::paused(QString jid)
+void MainWindow::paused(QString jid, QString participant)
 {
     if (chatWindowList.contains(jid))
     {
         ChatWindow *chat = chatWindowList.value(jid);
-        chat->paused();
+        chat->paused(participant);
     }
 }
 
@@ -750,6 +758,7 @@ void MainWindow::showGlobalSettingsDialog()
         Client::showNicknames = dialog.getShowNicknames();
         Client::showNumbers = dialog.getShowNumbers();
         Client::popupOnFirstMessage = dialog.getPopupOnFirstMessage();
+        Client::blueChecks = dialog.getBlueChecks();
         Client::automaticDownloadBytes = dialog.getAutomaticDownloadBytes();
         Client::importMediaToGallery = dialog.getImportMediaToGallery();
         Client::syncFreq = dialog.getSyncFrequency();
@@ -984,6 +993,10 @@ void MainWindow::showStatusWindow()
 
     connect(window,SIGNAL(changeStatus(QString)),
             this,SLOT(requestChangeStatus(QString)));
+    connect(this,SIGNAL(ownStatusUpdated(QString)),
+            window,SLOT(statusReceived(QString)));
+
+    emit getMyStatus();
 
     showWindow(window);
 }
@@ -1022,6 +1035,11 @@ void MainWindow::sendVoiceNotePlayed(FMessage message)
     emit voiceNotePlayed(message);
 }
 
+void MainWindow::sendMessageRead(FMessage message)
+{
+    emit messageRead(message);
+}
+
 void MainWindow::photoReceived(Contact &c, QImage photo, QString photoId)
 {
     // I don't think this is needed
@@ -1049,6 +1067,7 @@ void MainWindow::statusChanged(QString jid, QString status)
         chat->statusChanged(status);
     }
 
+    if(jid==Client::myJid) emit ownStatusUpdated(status);
     emit userStatusUpdated(jid);
 }
 
@@ -1197,7 +1216,7 @@ void MainWindow::forwardMessage(FMessage message)
                     message.media_wa_type == FMessage::Image ||
                     message.media_wa_type == FMessage::Video ||
                     message.media_wa_type == FMessage::Voice)
-                    chat->sendMultimediaMessage(message.local_file_uri, message.media_wa_type, message.live);
+                    chat->sendMultimediaMessage(message.local_file_uri, message.media_wa_type, message.live, message.media_caption);
                 break;
 
             default:

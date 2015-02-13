@@ -62,20 +62,21 @@ public:
     const Contact& getContact() const;
     void messageStatusUpdate(FMessage& message);
     void available(bool online, qint64 lastSeen);
-    void composing(QString media);
-    void paused();
+    void composing(QString participant, QString media);
+    void paused(QString participant);
     FMessage lastMessage();
     void setMute(qint64 timestamp);
     void updateTimestamps();
 
 public slots:
     void readMoreLogLines();
+    void setMessagesAsRead();
     void textChanged();
     void myselfComposing(int waType = -1);
     void myselfPaused();
     void sendButtonClicked();
     void selectMultimediaMessage();
-    void sendMultimediaMessage(QString fileName, int waType, bool live);
+    void sendMultimediaMessage(QString fileName, int waType, bool live, QString caption);
     void mediaUploadAccepted(FMessage msg);
     void mediaUploadStarted(MediaUpload *mediaUpload, FMessage msg);
     void mediaUploadFinished(MediaUpload *mediaUpload, FMessage msg);
@@ -115,6 +116,7 @@ signals:
     void userStatusChanged();
     void blockOrUnblockContact(QString jid, bool blocked);
     void voiceNotePlayed(FMessage message);
+    void messageRead(FMessage message);
     void updateLastDir(int waType, QString dir);
     void forwardMessage(FMessage message);
 

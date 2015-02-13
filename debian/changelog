@@ -1,3 +1,72 @@
+yappari (2.0.5) stable; urgency=medium
+
+  * Fix registration (CODeRUS)
+  * Fix own status information
+  * Gather group ownership. This allows again to manage our groups (NerdKnight)
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Sun, 08 Feb 2015 16:26:45 +0100
+
+yappari (2.0.4) stable; urgency=medium
+
+  * Fixed group commands (listing members, title, etc)
+  * "X is typing" functionality restored and implemented for groups
+  * "Last seen functionality" fixed (cepiperez)
+  * Report read messages only when chat window is made active
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Sun, 01 Feb 2015 16:01:40 +0100
+
+yappari (2.0.3) stable; urgency=medium
+
+  * Implemented (as a selectable but enabled by default option) ability to send
+    and receive read notifications on individual chats (i.e.: blue double tick).
+  * Better UI for multimedia messages with long captions.
+  * Fixed registration again and replaced code to avoid reregistration on certain
+    occasions (CODeRUS).
+  * Fixed last seen timestamp (CODeRUS).
+  * Added infrastructure to report which participant is composing message on
+    group chats (cepiperez).
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Thu, 29 Jan 2015 14:57:46 +0100
+
+yappari (2.0.2) stable; urgency=medium
+
+  * Registration fixed.
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Sun, 25 Jan 2015 10:32:03 +0100
+
+yappari (2.0.1) stable; urgency=medium
+
+  * New protocol version
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Sat, 24 Jan 2015 17:57:46 +0100
+
+yappari (1.1.55) stable; urgency=low
+
+  * Upgraded USER_AGENT_VERSION, BUILD_KEY and BUILD_HASH to fake latest S40.
+    Maybe this helps?
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Wed, 21 Jan 2015 16:14:54 +0100
+
+yappari (1.1.54) stable; urgency=low
+
+  * Fixed media sending dialogs
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Wed, 21 Jan 2015 16:14:54 +0100
+
+yappari (1.1.53) stable; urgency=low
+
+  * Preview images, video and audio before sending them
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Fri, 16 Jan 2015 18:11:54 +0100
+
+yappari (1.1.52) stable; urgency=low
+
+  * First release made by AGM
+  * Implemented rudimentary double blue tick on sent messages to individuals
+  * Implemented send/receive captions associated to multimedia files.
+
+ -- Alvaro Gamez Machado <alvaro.gamez@hazent.com>  Tue, 30 Dec 2014 20:11:54 +0100
+
 yappari (1.1.51) stable; urgency=low
 
   * Fixed registration once again and bumped version number.

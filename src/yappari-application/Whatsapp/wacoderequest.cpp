@@ -45,31 +45,26 @@ WACodeRequest::WACodeRequest(QString cc, QString in, QString method,
     QString country = "ZZ";
     QString mcc = "734";
     QString mnc = "002";
-    QString imsi = "000000000000000";
 #else
     QString language = systemInfo.currentLanguage();
     QString country = systemInfo.currentCountryCode();
     QString mcc = networkInfo.currentMobileCountryCode();
     QString mnc = networkInfo.currentMobileNetworkCode();
-    // QString imsi = deviceInfo.imsi();
 #endif
 
     if (mcc.length() < 3)
-        mcc = QString(3-mcc.length(),QChar('0')) + mcc;
+        mcc = mcc.rightJustified(3, '0');
 
     if (mnc.length() < 3)
-        mnc = QString(3-mnc.length(),QChar('0')) + mnc;
+        mnc = mnc.rightJustified(3, '0');
 
     addParam("cc", cc);
     addParam("in", in);
-    addParam("reason","next-method");
+    addParam("lc", country.isEmpty() ?  "GB" : country);
+    addParam("lg", language.isEmpty() ? "en" : language);
+    addParam("sim_mcc", mcc);
+    addParam("sim_mnc", mnc);
     addParam("method", method);
-    addParam("mcc", mcc);
-    addParam("mnc", mnc);
-    addParam("lg", language.isEmpty() ? "zz" : language);
-    addParam("lc", country.isEmpty() ?  "ZZ" : country);
     addParam("token", Utilities::getToken(in));
-
-    // addParam("imsi", imsi.isEmpty() ? "00000000000000" : imsi);
     addParam("id",id);
 }

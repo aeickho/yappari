@@ -1,4 +1,4 @@
-/* Copyright 2013 Naikel Aparicio. All rights reserved.
+/* Copyright 2015 Alvaro Gamez Machado <alvaro.gamez@hazent.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,23 +26,36 @@
  * official policies, either expressed or implied, of the copyright holder.
  */
 
-#ifndef WAEXISTSREQUEST_H
-#define WAEXISTSREQUEST_H
+#include "imagepreviewdialog.h"
+#include "ui_imagepreviewdialog.h"
 
-#include <QString>
-#include <QSystemInfo>
+#include <QImageReader>
+#include <phonon>
+#include <phonon/VideoPlayer>
+#include "Whatsapp/fmessage.h"
 
-#include "warequest.h"
-
-// QtMobility namespace
-QTM_USE_NAMESPACE
-
-class WAExistsRequest : public WARequest
+ImagePreviewDialog::ImagePreviewDialog(QWidget *parent, const QString & media_path) :
+    QDialog(parent),
+    ui(new Ui::ImagePreviewDialog)
 {
-    Q_OBJECT
+    ui->setupUi(this);
 
-public:
-    WAExistsRequest(QString cc, QString in, QString id, QObject *parent = 0);
-};
+    ui->img->show();
 
-#endif // WAEXISTSREQUEST_H
+    QImage image;
+    image.load(media_path);
+
+    QPixmap scaledImage = QPixmap::fromImage(image).scaled(400, 400, Qt::KeepAspectRatio);
+    ui->img->setPixmap(scaledImage);
+}
+
+ImagePreviewDialog::~ImagePreviewDialog()
+{
+    delete ui;
+}
+
+QString ImagePreviewDialog::getCaption()
+{
+    return ui->caption->text();
+}
+

@@ -152,6 +152,8 @@ public slots:
     // Sends a FMessage
     void sendMessage(FMessage& message);
 
+    // Send a message read acknowledgement
+    void sendMessageRead(FMessage& message);
 
     /** ***********************************************************************
      ** User handling
@@ -363,14 +365,16 @@ private:
     void sendMessageReceived(FMessage& message);
 
     // Send a notification received acknowledgement
-    void sendNotificationReceived(QString to, QString id);
+    void sendNotificationReceived(QString to, QString id, QString from="",
+                                  QString participant="", QString type="",
+                                  ProtocolTreeNode childNode=ProtocolTreeNode());
 
     // Constructs a receipt acknowledge node
     void getReceiptAck(ProtocolTreeNode& node, QString to, QString id,
                        QString receiptType);
 
     // Sends a receipt acknowledging a delivered message notification received
-    void sendDeliveredReceiptAck(QString to, QString id, QString type);
+    void sendDeliveredReceiptAck(QString to, QString id, QString type="", QString participant="");
 
 
     /** ***********************************************************************
@@ -432,10 +436,10 @@ signals:
      **/
 
     // User is typing
-    void composing(QString jid, QString media);
+    void composing(QString jid, QString participant, QString media);
 
     // User stopped typing
-    void paused(QString jid);
+    void paused(QString jid, QString participant);
 
 
     /** ***********************************************************************

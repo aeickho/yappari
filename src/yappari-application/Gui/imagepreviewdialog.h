@@ -1,4 +1,4 @@
-/* Copyright 2013 Naikel Aparicio. All rights reserved.
+/* Copyright 2015 Alvaro Gamez Machado <alvaro.gamez@hazent.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,23 +26,26 @@
  * official policies, either expressed or implied, of the copyright holder.
  */
 
-#ifndef WAEXISTSREQUEST_H
-#define WAEXISTSREQUEST_H
+#ifndef IMAGEPREVIEWDIALOG_H
+#define IMAGEPREVIEWDIALOG_H
 
-#include <QString>
-#include <QSystemInfo>
+#include <QDialog>
 
-#include "warequest.h"
+namespace Ui {
+    class ImagePreviewDialog;
+}
 
-// QtMobility namespace
-QTM_USE_NAMESPACE
-
-class WAExistsRequest : public WARequest
+class ImagePreviewDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    WAExistsRequest(QString cc, QString in, QString id, QObject *parent = 0);
+    explicit ImagePreviewDialog(QWidget *parent, const QString & media_path);
+    ~ImagePreviewDialog();
+    QString getCaption();
+
+private:
+    Ui::ImagePreviewDialog *ui;
 };
 
-#endif // WAEXISTSREQUEST_H
+#endif // IMAGEPREVIEWDIALOG_H

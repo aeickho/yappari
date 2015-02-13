@@ -1,4 +1,4 @@
-/* Copyright 2013 Naikel Aparicio. All rights reserved.
+/* Copyright 2015 Alvaro Gamez Machado <alvaro.gamez@hazent.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,23 +26,52 @@
  * official policies, either expressed or implied, of the copyright holder.
  */
 
-#ifndef WAEXISTSREQUEST_H
-#define WAEXISTSREQUEST_H
+#include "audiopreviewdialog.h"
+#include "ui_audiopreviewdialog.h"
 
-#include <QString>
-#include <QSystemInfo>
+#include <QImageReader>
+#include <phonon>
+#include <phonon/VideoPlayer>
+#include "Whatsapp/fmessage.h"
 
-#include "warequest.h"
-
-// QtMobility namespace
-QTM_USE_NAMESPACE
-
-class WAExistsRequest : public WARequest
+AudioPreviewDialog::AudioPreviewDialog(QWidget *parent, const QString & media_path) :
+    QDialog(parent),
+    ui(new Ui::AudioPreviewDialog)
 {
-    Q_OBJECT
+    ui->setupUi(this);
 
-public:
-    WAExistsRequest(QString cc, QString in, QString id, QObject *parent = 0);
-};
+    ui->audio->load(media_path);
+    finished();
+}
 
-#endif // WAEXISTSREQUEST_H
+AudioPreviewDialog::~AudioPreviewDialog()
+{
+    delete ui;
+}
+
+QString AudioPreviewDialog::getCaption()
+{
+    return "";
+}
+
+
+void AudioPreviewDialog::playstop()
+{
+    if(ui->audio->isPlaying())
+    {
+        ui->audio->stop();
+        finished();
+    }
+    else
+    {
+        ui->playstop->setIcon(QIcon("/usr/share/yappari/icons/48x48/stop-icon.png"));
+        ui->audio->play();
+    }
+}
+
+void AudioPreviewDialog::finished()
+{
+    ui->playstop->setIcon(QIcon("/usr/share/yappari/icons/48x48/play-icon.png"));
+    ui->audio->stop();
+    ui->audio->seek(0);
+}
